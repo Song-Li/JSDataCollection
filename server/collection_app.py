@@ -32,48 +32,6 @@ mysql.init_app(app)
 CORS(app)
 base64_header = "data:image/png;base64,"
 
-mask = []
-mac_mask = []
-feature_list = [
-        "agent",
-        "accept",
-        "encoding",
-        "language",
-        "langsDetected",
-        "resolution",
-        "jsFonts",
-        "WebGL", 
-        "inc", 
-        "gpu", 
-        "gpuimgs", 
-        "timezone", 
-        "plugins", 
-        "cookie", 
-        "localstorage", 
-        "adBlock", 
-        "cpucores", 
-        "canvastest", 
-        "audio",
-        "ccaudio",
-        "hybridaudio",
-        "touchSupport",
-        "doNotTrack",
-        "fp2_colordepth", 
-        "fp2_sessionstorage",
-        "fp2_indexdb",
-        "fp2_addbehavior",
-        "fp2_opendatabase",
-        "fp2_cpuclass",
-        "fp2_pixelratio",
-        "fp2_platform",
-        "fp2_liedlanguages",
-        "fp2_liedresolution",
-        "fp2_liedos",
-        "fp2_liedbrowser",
-        "fp2_webgl",
-        "fp2_webglvendoe"
-        ]
-
 def run_sql(sql_str):
     db = mysql.get_db()
     cursor = db.cursor()
@@ -81,107 +39,6 @@ def run_sql(sql_str):
     db.commit()
     res = cursor.fetchall() 
     return res
-
-def get_os_from_agent(agent):
-    start_pos = 0
-    if agent.find('(') != -1:
-        start_pos = agent.find('(')
-    end_pos = agent.find(')', start_pos)
-
-    return agent[start_pos:end_pos]
-
-def get_browser_from_agent(agent):
-    start_pos = 0
-    if agent.find('Firefox') != -1:
-        start_pos = agent.find("Firefox")
-    elif agent.find('Edge') != -1:
-        start_pos = agent.find('Edge')
-    elif agent.find('Chrome') != -1:
-        start_pos = agent.find('Chrome')
-    elif agent.find('Safari') != -1:
-        start_pos = agent.find('Safari')
-
-    if start_pos == 0:
-        return 'unknown'
-    else:
-        # here use space as the end char
-        end_pos = agent.find(' ', start_pos)
-        if end_pos == -1:
-            end_pos = len(agent)
-        return agent[start_pos:end_pos]
-
-def genFingerprint(recordID):
-    feature_str = ",".join(feature_list)
-    sql_str = 'select {} from features where uniquelabel="{}"'.format(feature_str, recordID)
-    res = run_sql(sql_str)
-    fingerprint = hashlib.sha1(str(res[0])).hexdigest()
-    sql_str = 'UPDATE features SET {}="{}" WHERE uniquelabel = "{}"'.format('browserfingerprint', fingerprint, recordID)
-    run_sql(sql_str)
-    return fingerprint
-
-
-
-@app.route("/finishPage", methods=['POST'])
-def finishPage():
-    recordID = request.values['recordID']
-    return genFingerprint(recordID)
-
-@app.route("/distance", methods=['POST'])
-def distance():
-    feature_list = [
-            "agent",
-            "accept",
-            "encoding",
-            "language",
-            "langsdetected",
-            "resolution",
-            "jsFonts",
-            "WebGL", 
-            "inc", 
-            "gpu", 
-            "gpuimgs", 
-            "timezone", 
-            "plugins", 
-            "cookie", 
-            "localstorage", 
-            "adblock", 
-            "cpu_cores", 
-            "canvas_test", 
-            "audio",
-            "cc_audio",
-            "hybrid_audio",
-            "clientId"
-            ]
-
-
-    sql_str = "DESCRIBE features"
-    res = run_sql(sql_str)
-    attrs = []
-    for attr in res:
-        attrs.append(attr[0])
-
-    ID = request.values['id']
-    sql_str = "SELECT * FROM features"
-    all_records = run_sql(sql_str)
-    sql_str = "SELECT * FROM features WHERE id=" + ID
-    aim_record = run_sql(sql_str)[0]
-    num_attr = len(aim_record)
-    cur_max = -1 
-    max_record = ""
-    cur_same = 0
-    for record in all_records:
-        cur_same = 0
-        if str(ID) == str(record[24]):
-            continue
-        for feature in feature_list: 
-            i = attrs.index(feature)
-            if record[i] == aim_record[i]:
-                cur_same += 1
-        if cur_same > cur_max:
-            cur_max = cur_same
-            max_record = str(record[21])
-    return str(float(cur_max) / float(len(feature_list))) + ", " + max_record 
-
 
 # update one feature requested from client to the database asynchronously.
 # before this function, we have to make sure
@@ -196,19 +53,6 @@ def doUpdateFeatures(unique_label, data):
     res = run_sql(sql_str)
     genFingerprint(unique_label)
     return res 
-
-
-# try to use the ip location
-def get_location_by_ip(ip):
-    city = "failed"
-    #try:
-    #    url = 'http://ipinfo.io/{}/json'.format(ip)
-    #    response = urlopen(url)
-    #    data = json.load(response)
-    #    city = smart_str(data['city'])
-    #except:
-    #    pass
-    return city
 
 def doInit(unique_label, cookie):
 
@@ -263,7 +107,7 @@ def getCookie():
     doInit(unique_label, cookie)
     return unique_label + ',' + cookie
 
-@app.route("/check_exsit_picture", methods=['POST'])
+@app.route("/check_exist_picture", methods=['POST'])
 def check_exsit_picture():
     hash_value = request.values['hash_value']
     sql_str = "SELECT count(dataurl) FROM pictures WHERE dataurl='" + hash_value + "'"

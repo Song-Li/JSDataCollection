@@ -3,7 +3,8 @@ class DataHandler = function() {
    * A handler class for receving and sending data to Server
    *
    * @access    public
-   * @constructs DataHandler(), DataHandler(server_address)
+   * @constructor DataHandler()
+   * @constructor DataHandler(server_address)
    *
    * @param server_address attributes   the server address that will interact with 
    *
@@ -18,9 +19,8 @@ class DataHandler = function() {
     this.recordID = "";
   }
 
-  var _this = this;
   this.request_unique_label = function() {
-
+    this.doSend('get_unique_label', {'get_key' = 'get_key'}, async = false);
   }
 
   var doSend = function (app_name, key_value_pairs, async = false, encoded = true) {
@@ -62,8 +62,8 @@ class DataHandler = function() {
     return this.doSend('pictures', data, async = true)
   }
 
-  this.updateFeatures = function(feature_data){
-    feature_data['unique_label'] = this.unique_label;
+  this.update_database = function(value_data) {
+    value_data['unique_label'] = this.unique_label;
     app_name = 'updateFeatures';
     var data_str = JSON.stringify(feature_data) 
     this.doSend(app_name, data_str)

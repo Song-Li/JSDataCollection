@@ -1,4 +1,5 @@
 from flask import Flask, request,make_response, current_app
+from server_helper import *
 import os
 import md5
 from flask_failsafe import failsafe
@@ -32,27 +33,9 @@ mysql.init_app(app)
 CORS(app)
 base64_header = "data:image/png;base64,"
 
-def run_sql(sql_str):
-    db = mysql.get_db()
-    cursor = db.cursor()
-    cursor.execute(sql_str)
-    db.commit()
-    res = cursor.fetchall() 
-    return res
-
 # update one feature requested from client to the database asynchronously.
 # before this function, we have to make sure
 # every feature is included in the sql server
-def doUpdateFeatures(unique_label, data):
-    update_str = ""
-    for key, value in data.iteritems():
-        update_str += '{}="{}",'.format(key, value)
-
-    update_str = update_str[:-1]
-    sql_str = 'UPDATE features SET {} WHERE uniquelabel = "{}"'.format(update_str, unique_label)
-    res = run_sql(sql_str)
-    genFingerprint(unique_label)
-    return res 
 
 def doInit(unique_label, cookie):
 

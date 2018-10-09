@@ -39,6 +39,11 @@ CREATE TABLE `features` (
   `time` datetime DEFAULT CURRENT_TIMESTAMP,
   `cookie` text,
   `clientid` text,
+  `browser` text,
+  `browserversion` text,
+  `os` text,
+  `osversion` text,
+  `device` text,
   `uniquelabel` varchar(64) DEFAULT NULL,
   KEY `uniquelabel` (`uniquelabel`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

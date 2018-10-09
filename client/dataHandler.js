@@ -1,29 +1,24 @@
-class DataHandler = function() {
+class DataHandler {
   /**
    * A handler class for receving and sending data to Server
    *
    * @access    public
-   * @constructor DataHandler()
-   * @constructor DataHandler(serverAddress)
+   * @constructs DataHandler()
    *
    * @param serverAddress attributes   the server address that will interact with 
    *
    */
-  constructor(serverAddress) {
+
+  constructor(serverAddress = "") {
     this.serverAddress = serverAddress;
-  }
-
-  constructor() {
-    this.serverAddress = "";
     this.uniqueLabel = this.requestUniqueLabel();
-    this.recordID = "";
   }
 
-  this.requestUniqueLabel = function() {
-    this.doSend('getUniqueLabel', {'get_key' = 'get_key'}, async = false);
+  requestUniqueLabel() {
+    this.doSend('getUniqueLabel', {'get_key':'get_key'}, false);
   }
 
-  var doSend = function (appName, keyValuePairs, async = false, encoded = true) {
+  doSend (appName, keyValuePairs, async = false, encoded = true) {
     /**
      * do send to the server.
      *
@@ -57,12 +52,12 @@ class DataHandler = function() {
     }
   }
 
-  this.storePicture = function(dataURL) {
+  storePicture(dataURL) {
     var data = "imageBase64=" + encodeURIComponent(dataURL); 
     return this.doSend('pictures', data, async = true)
   }
 
-  this.updateDatabase = function(valueData) {
+  updateDatabase(valueData) {
     valueData['uniqueLabel'] = this.uniqueLabel;
     appName = 'updateFeatures';
     var dataStr = JSON.stringify(valueData) 

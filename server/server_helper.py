@@ -73,4 +73,3 @@ def get_full_device(row):
     device = ignore_non_ascii(parsed.device.family)
     return '{} {}'.format(device, ignore_non_ascii(parsed.device.brand))
 
-

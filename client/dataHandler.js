@@ -12,7 +12,6 @@ class DataHandler {
   constructor(serverAddress = "") {
     this.serverAddress = serverAddress;
     this.uniqueLabel = this.requestUniqueLabel();
-    console.log(this.uniqueLabel);
   }
 
   requestUniqueLabel() {
@@ -55,14 +54,21 @@ class DataHandler {
   }
 
   storePicture(dataURL) {
+    /**
+     * TODO not tested
+     */
     var data = "imageBase64=" + encodeURIComponent(dataURL); 
-    return this.doSend('pictures', data, async = true)
+    return this.doSend('pictures', data, async = true);
   }
 
   updateDatabase(valueData) {
-    valueData['uniqueLabel'] = this.uniqueLabel;
-    appName = 'updateFeatures';
-    var dataStr = JSON.stringify(valueData) 
-    this.doSend(appName, dataStr)
+    /**
+     * @param valueData dict    the update data dict
+     * @return result string    the update result from the server
+     */
+    valueData['uniquelabel'] = this.uniqueLabel;
+    var appName = 'updateFeatures';
+    var res = this.doSend(appName, valueData, false, false);
+    return res;
   }
 }

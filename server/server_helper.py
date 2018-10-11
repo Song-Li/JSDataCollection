@@ -60,7 +60,7 @@ def extractInfoFromAgent(agent):
     parsed = user_agents.parse(agent)
     browser_type = ignore_non_ascii(parsed.browser.family)
     browser_version = ignore_non_ascii(parsed.browser.version_string)
-    device_type = ignore_non_ascii(parsed.device.family)
+    device_type = '{}_{}'.format(ignore_non_ascii(parsed.device.family), ignore_non_ascii(parsed.device.brand))
     os_type = ignore_non_ascii(parsed.os.family)
     os_version = ignore_non_ascii(parsed.os.version_string)
     return browser_type, browser_version, device_type, os_type, os_version

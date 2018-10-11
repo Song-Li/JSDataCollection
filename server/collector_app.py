@@ -1,43 +1,22 @@
-from flask import Flask, request,make_response, current_app
 from server_helper import *
 import os
 import md5
 from flask_failsafe import failsafe
 import flask
-from flask_cors import CORS, cross_origin
 import json
 import hashlib
-from flaskext.mysql import MySQL
-import ConfigParser
 import re
-import numpy as np
 from PIL import Image
-import base64
 import cStringIO
 from datetime import datetime
 from urllib2 import urlopen
-from django.utils.encoding import smart_str, smart_unicode
-
-root = "/home/sol315/server/uniquemachine/"
-pictures_path = "/home/sol315/pictures/"
-config = ConfigParser.ConfigParser()
-config.read(root + 'password.ignore')
-
-mysql = MySQL()
-app = Flask(__name__)
-app.config['MYSQL_DATABASE_USER'] = config.get('mysql', 'username')
-app.config['MYSQL_DATABASE_PASSWORD'] = config.get('mysql', 'password')
-app.config['MYSQL_DATABASE_DB'] = 'uniquemachine'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-mysql.init_app(app)
-CORS(app)
-base64_header = "data:image/png;base64,"
+import random
 
 # update one feature requested from client to the database asynchronously.
 # before this function, we have to make sure
 # every feature is included in the sql server
 
-def doInit(unique_label, cookie):
+def doInit(unique_label):
 
     result = {}
     agent = ""
@@ -63,32 +42,19 @@ def doInit(unique_label, cookie):
 
     # update the statics
     result['agent'] = agent
-    result['accept'] = accept
-    result['encoding'] = encoding
-    result['language'] = language
-    result['label'] = cookie
-    # remove iplocation
-    result['httpheaders'] = keys 
+    
+    result['browser'], result['browserversion'], result['device'], result['os'],result['osversion'] = extractInfoFromAgent(agent)
+
 
     return doUpdateFeatures(unique_label, result)
 
-@app.route("/getCookie", methods=['POST'])
-def getCookie():
+@app.route("/getUniqueLabel", methods=['POST'])
+def getUniqueLabel():
     IP = request.remote_addr
-    id_str = IP + str(datetime.now()) 
+    id_str = IP + str(datetime.now()) + str(random.randint(1, 10000000))
     unique_label = hashlib.sha1(id_str).hexdigest()
-
-    cookie = request.values['cookie']
-    sql_str = 'SELECT count(id) FROM cookies WHERE cookie = "{}"'.format(cookie)
-    res = run_sql(sql_str)
-
-    if res[0][0] == 0:
-        cookie = unique_label 
-        sql_str = "INSERT INTO cookies (cookie) VALUES ('" + cookie + "')"
-        run_sql(sql_str)
-
-    doInit(unique_label, cookie)
-    return unique_label + ',' + cookie
+    doInit(unique_label)
+    return unique_label
 
 @app.route("/check_exist_picture", methods=['POST'])
 def check_exsit_picture():

@@ -1,4 +1,23 @@
 import user_agents
+from flask_cors import CORS, cross_origin
+import ConfigParser
+import base64
+from flaskext.mysql import MySQL
+from flask import Flask, request,make_response, current_app
+
+root = "/home/sol315/server/collector/"
+pictures_path = "/home/sol315/pictures/"
+config = ConfigParser.ConfigParser()
+config.read(root + 'password.ignore')
+mysql = MySQL()
+app = Flask(__name__)
+app.config['MYSQL_DATABASE_USER'] = config.get('mysql', 'username')
+app.config['MYSQL_DATABASE_PASSWORD'] = config.get('mysql', 'password')
+app.config['MYSQL_DATABASE_DB'] = 'collector'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+mysql.init_app(app)
+CORS(app)
+base64_header = "data:image/png;base64,"
 
 def ignore_non_ascii(str1):
     """
@@ -34,42 +53,15 @@ def run_sql(sql_str):
     res = cursor.fetchall() 
     return res
 
-def get_browser_from_agent(agent):
+def extractInfoFromAgent(agent):
     """
-    return the browser type by the input agent
-    """
-    try:
-        return ignore_non_ascii(user_agents.parse(agent).browser.family)
-    except:
-        return "agent error"
-
-def get_browser_version(agent):
-    """
-    return the string of browser and version number
-    if it's others, just return other
+    return browser_type, browser_version, device_type, os_type, os_version
     """
     parsed = user_agents.parse(agent)
-    return ignore_non_ascii(parsed.browser.family) + '#%' + ignore_non_ascii(parsed.browser.version_string)
-
-def get_os_version(agent):
-    """
-    return the string of os and version number
-    """
-    parsed = user_agents.parse(agent)
-    return ignore_non_ascii(parsed.os.family) + '#%' + ignore_non_ascii(parsed.os.version_string)
-
-def get_os_from_agent(agent):
-    try:
-        parsed = user_agents.parse(agent)
-        return ignore_non_ascii(parsed.os.family)
-    except:
-        return "os error"
-
-def get_full_device(row):
-    """
-    get the full device infor including device family and brand
-    """
-    parsed = user_agents.parse(row['agent'])
-    device = ignore_non_ascii(parsed.device.family)
-    return '{} {}'.format(device, ignore_non_ascii(parsed.device.brand))
+    browser_type = ignore_non_ascii(parsed.browser.family)
+    browser_version = ignore_non_ascii(parsed.browser.version_string)
+    device_type = ignore_non_ascii(parsed.device.family)
+    os_type = ignore_non_ascii(parsed.os.family)
+    os_version = ignore_non_ascii(parsed.os.version_string)
+    return browser_type, browser_version, device_type, os_type, os_version
 

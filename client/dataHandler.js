@@ -12,10 +12,11 @@ class DataHandler {
   constructor(serverAddress = "") {
     this.serverAddress = serverAddress;
     this.uniqueLabel = this.requestUniqueLabel();
+    console.log(this.uniqueLabel);
   }
 
   requestUniqueLabel() {
-    this.doSend('getUniqueLabel', {'get_key':'get_key'}, false);
+    return this.doSend('getUniqueLabel', {'get_key':'get_key'}, false);
   }
 
   doSend (appName, keyValuePairs, async = false, encoded = true) {
@@ -35,11 +36,11 @@ class DataHandler {
     var xhttp = new XMLHttpRequest();
     var url = `${this.serverAddress}/${appName}`;
     var data = JSON.stringify(keyValuePairs);
+    var res = "";
 
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
-        var res = this.responseText;
-        return res
+        res = this.responseText;
       }
     };
 
@@ -50,6 +51,7 @@ class DataHandler {
     } else {
       xhttp.send(data);
     }
+    return res;
   }
 
   storePicture(dataURL) {

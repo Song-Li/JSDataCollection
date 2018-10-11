@@ -1,5 +1,4 @@
 -- Server version	5.7.20-0ubuntu0.16.04.1
-USE collection;
 --
 -- Table structure for table `cookies`
 --

@@ -16,8 +16,13 @@ import random
 # before this function, we have to make sure
 # every feature is included in the sql server
 
-def doInit(unique_label):
+'''
+TODO: current this file can not be used because of the SQL injection
+need to be updated somehow
+'''
 
+
+def doInit(unique_label):
     result = {}
     agent = ""
     accept = ""
